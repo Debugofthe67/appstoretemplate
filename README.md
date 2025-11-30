@@ -1,2 +1,463 @@
 # appstoretemplate
 Template to make online App Stores
+##Code 
+This is the code
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>App Store Template</title>
+<style>
+  :root{
+    --bg0:#0b0f14;
+    --bg1:#0d1218;
+    --text:#e9eef6;
+    --muted:#9fb0c6;
+    --stroke:rgba(255,255,255,0.14);
+    --shadow:rgba(8,16,24,0.55);
+    --accent:#7cc7ff;
+    --glass-hi:rgba(255,255,255,0.22);
+    --glass-lo:rgba(255,255,255,0.10);
+    --ink:#0f1722;
+  }
+
+  html,body{
+    height:100%; margin:0; color:var(--text);
+    background:
+      radial-gradient(1200px 800px at 8% -8%, rgba(124,199,255,0.12), transparent 60%),
+      radial-gradient(1200px 800px at 110% 8%, rgba(154,140,255,0.12), transparent 60%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    overflow-x:hidden;
+  }
+
+  /* Header */
+  .header{
+    width:min(980px,94vw); margin:12px auto;
+    padding:12px; border-radius:24px; border:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 18px 40px var(--shadow);
+    display:flex; align-items:center; gap:12px; position:sticky; top:8px; z-index:40; overflow:hidden;
+  }
+  .brand{
+    font-weight:800; letter-spacing:0.2px;
+    background:linear-gradient(90deg,var(--text),var(--muted));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    user-select:none;
+  }
+  .spacer{ flex:1; }
+  .search{ position:relative; flex:0 1 320px; }
+  .search input{
+    width:100%; padding:10px 36px 10px 12px; border-radius:16px; border:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.12));
+    color:var(--text); outline:none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 10px 20px var(--shadow);
+    backdrop-filter: blur(12px) saturate(1.15);
+    -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  }
+  .search svg{ position:absolute; right:10px; top:50%; transform:translateY(-50%); opacity:0.8; }
+
+  /* App shell pages */
+  .page{
+    width:min(980px,94vw); margin:12px auto 100px; position:relative;
+    display:none; opacity:0; transform:translateY(18px);
+    transition: opacity 360ms ease, transform 360ms ease;
+  }
+  .page.active{ display:block; opacity:1; transform:translateY(0); }
+
+  .section-title{
+    margin:18px 6px 12px; font-weight:800; letter-spacing:0.2px; opacity:0.95; user-select:none;
+  }
+
+  /* Liquid glass container */
+  .glass{
+    position:relative; border-radius:22px; border:1px solid var(--stroke);
+    background:
+      radial-gradient(500px 240px at 50% -120px, rgba(255,255,255,0.35), rgba(255,255,255,0)),
+      linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+    backdrop-filter: blur(20px) saturate(1.25) contrast(1.02);
+    -webkit-backdrop-filter: blur(20px) saturate(1.25) contrast(1.02);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -1px 0 rgba(255,255,255,0.12), 0 26px 60px var(--shadow);
+    overflow:hidden;
+  }
+  .glass::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(420px 220px at 50% -80px, rgba(255,255,255,0.55), rgba(255,255,255,0)),
+      radial-gradient(600px 280px at 50% -140px, rgba(255,255,255,0.35), rgba(255,255,255,0));
+    mix-blend-mode:screen; opacity:0.25;
+  }
+  .noise{
+    position:absolute; inset:0; pointer-events:none;
+    background-image:url('data:image/svg+xml;utf8,\
+      <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">\
+        <filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter>\
+        <rect width="160" height="160" filter="url(#n)" opacity="0.06"/>\
+      </svg>');
+    opacity:0.08;
+  }
+
+  /* Hero layout */
+  .hero{ display:grid; grid-template-columns: 1.2fr 1fr; }
+  .hero-img{ min-height:200px; background-size:cover; background-position:center; }
+  .hero-body{ padding:16px; display:flex; flex-direction:column; gap:6px; }
+  .hero-title{ font-weight:800; }
+  .hero-sub{ color:var(--muted); }
+  .hero-actions{ display:flex; gap:10px; margin-top:8px; }
+
+  /* Cards list */
+  .list{ display:flex; flex-direction:column; gap:10px; }
+  .row{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:18px; }
+  .icon{
+    width:56px; height:56px; border-radius:14px; object-fit:cover;
+    border:1px solid var(--stroke); background:#111; box-shadow:0 6px 14px rgba(0,0,0,0.45);
+  }
+  .meta{ flex:1; }
+  .title{ font-weight:700; }
+  .sub{ color:var(--muted); font-size:0.92rem; }
+
+  /* Buttons */
+  .btn{
+    appearance:none; border:none; cursor:pointer; padding:9px 16px; border-radius:18px; font-weight:700;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.45));
+    color:var(--ink);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 12px 24px var(--shadow);
+    transition: transform 120ms ease, filter 140ms ease;
+  }
+  .btn:hover{ transform: translateY(-1px); filter: saturate(1.05); }
+  .btn.primary{
+    background: linear-gradient(180deg, rgba(124,199,255,0.95), rgba(124,199,255,0.55));
+    color:#0b2236;
+  }
+
+  /* Bottom pill nav */
+  .bottom-bar{
+    position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+    z-index:60; display:flex; gap:8px; align-items:center;
+    padding:10px; border-radius:22px; border:1px solid var(--stroke);
+    background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), 0 18px 40px var(--shadow);
+    backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    overflow:hidden;
+  }
+  .nav-pill{
+    padding:8px 14px; border-radius:18px; cursor:pointer; font-weight:700;
+    border:1px solid var(--stroke);
+    background: linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0.16));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+    color:var(--ink);
+    transition: transform 120ms ease, filter 140ms ease, background 160ms ease;
+  }
+  .nav-pill:hover{ transform: translateY(-1px); filter: saturate(1.05); }
+  .nav-pill.active{
+    background: linear-gradient(180deg, rgba(124,199,255,0.90), rgba(124,199,255,0.55));
+    color:#082033;
+  }
+
+  /* Modal window */
+  .modal-backdrop{
+    position:fixed; inset:0; display:none; place-items:center;
+    background: rgba(8,16,24,0.45); z-index:100;
+    opacity:0; transition: opacity 280ms ease;
+  }
+  .modal-backdrop.show{ display:grid; opacity:1; }
+  .modal{
+    width:min(560px,92vw); border-radius:20px; position:relative;
+    border:1px solid var(--stroke);
+    background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), 0 24px 50px var(--shadow);
+    backdrop-filter: blur(20px) saturate(1.25); -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    overflow:hidden; transform: translateY(12px); opacity:0;
+    transition: transform 260ms ease, opacity 260ms ease;
+  }
+  .modal.show{ transform: translateY(0); opacity:1; }
+  .modal-header{
+    display:flex; align-items:center; justify-content:space-between; padding:14px;
+    border-bottom:1px solid var(--stroke);
+  }
+  .modal-body{ padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .modal-footer{ padding:14px; display:flex; gap:8px; border-top:1px solid var(--stroke); }
+  .close{
+    width:36px; height:36px; border-radius:12px; display:grid; place-items:center; cursor:pointer;
+    border:1px solid var(--stroke);
+    background: linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0.16));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 18px var(--shadow);
+    color:var(--ink);
+  }
+
+  @media (max-width:560px){
+    .hero{ grid-template-columns:1fr; }
+    .search{ flex:1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="brand">App Store Template</div>
+  <div class="spacer"></div>
+  <div class="search">
+    <input id="search" type="text" placeholder="Search apps..." />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" opacity="0.7"/>
+      <line x1="20" y1="20" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" opacity="0.7"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Pages (tabbed views) -->
+<div id="page-today" class="page active">
+  <div class="section-title">Today</div>
+  <div class="glass hero" id="heroCard">
+    <div class="noise"></div>
+    <div class="hero-img" id="heroImg" style="background-image:url('https://via.placeholder.com/1200x600.png?text=Hero+Banner');"></div>
+    <div class="hero-body">
+      <div class="hero-title" id="heroTitle">Hero App</div>
+      <div class="hero-sub" id="heroSub">Developer • Category</div>
+      <div class="hero-actions">
+        <button class="btn primary" id="heroGet">GET</button>
+        <button class="btn" id="heroInfo">Info</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Featured</div>
+  <div class="list" id="featuredList"></div>
+</div>
+
+<div id="page-games" class="page">
+  <div class="section-title">Games</div>
+  <div class="list" id="gamesList"></div>
+</div>
+
+<div id="page-tweaks" class="page">
+  <div class="section-title">Tweaks</div>
+  <div class="list" id="tweaksList"></div>
+</div>
+
+<div id="page-search" class="page">
+  <div class="section-title">Search</div>
+  <div class="glass" style="padding:14px;">
+    <input id="search2" type="text" placeholder="Search apps..." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--stroke);background:linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.12));color:var(--text);outline:none;">
+  </div>
+</div>
+
+<!-- Bottom pill menu -->
+<div class="bottom-bar" id="bottomBar">
+  <button class="nav-pill active" data-tab="page-today">Today</button>
+  <button class="nav-pill" data-tab="page-games">Games</button>
+  <button class="nav-pill" data-tab="page-tweaks">Tweaks</button>
+  <button class="nav-pill" data-tab="page-search">Search</button>
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+  <div class="modal" id="modal">
+    <div class="noise"></div>
+    <div class="modal-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img id="modalIcon" class="icon" src="" alt="">
+        <div>
+          <div class="title" id="modalTitle">App name</div>
+          <div class="sub" id="modalDev">Developer</div>
+        </div>
+      </div>
+      <div class="close" id="modalClose" title="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+        </svg>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; gap:10px;">
+        <div class="meta">
+          <div class="sub">Version</div>
+          <div id="modalVersion">—</div>
+        </div>
+        <div class="meta">
+          <div class="sub">Category</div>
+          <div id="modalCategory">—</div>
+        </div>
+      </div>
+      <div id="modalDesc">—</div>
+      <a id="modalWebsite" href="#" target="_blank" class="sub" style="text-decoration:underline;">Developer website</a>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="modalCopy">Copy link</button>
+      <button class="btn primary" id="modalGet">GET</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Placeholder app data
+  const DATA = {
+    hero: {
+      name: "Placeholder Hero App",
+      dev: "Placeholder Dev",
+      version: "1.0",
+      cat: "Action",
+      desc: "A captivating hero app with seasonal events and awesome gameplay.",
+      icon: "https://via.placeholder.com/120.png?text=Hero",
+      banner: "https://via.placeholder.com/1200x600.png?text=Hero+Banner",
+      link: "https://example.com/hero-app",
+      website: "https://example.com/hero-dev"
+    },
+    featured: [
+      { name:"Featured App One", dev:"Dev Studio A", version:"2.0", cat:"Utility", desc:"Do more with powerful utility features and clean UI.", icon:"https://via.placeholder.com/120.png?text=F1", link:"https://example.com/featured-one", website:"https://example.com/dev-a" },
+      { name:"Featured App Two", dev:"Dev Studio B", version:"3.1", cat:"Security", desc:"Enhanced privacy and monitoring tools.", icon:"https://via.placeholder.com/120.png?text=F2", link:"https://example.com/featured-two", website:"https://example.com/dev-b" },
+      { name:"Featured App Three", dev:"Dev Studio C", version:"1.5", cat:"Games", desc:"Arcade fun with smooth animations.", icon:"https://via.placeholder.com/120.png?text=F3", link:"https://example.com/featured-three", website:"https://example.com/dev-c" }
+    ],
+    games: [
+      { name:"Game Alpha", dev:"Studio X", version:"4.0", cat:"Arcade", desc:"Retro action, modern polish.", icon:"https://via.placeholder.com/120.png?text=GA", link:"https://example.com/game-alpha", website:"https://example.com/studio-x" },
+      { name:"Game Beta", dev:"Studio Y", version:"1.9", cat:"Racing", desc:"Fast cars, dynamic weather.", icon:"https://via.placeholder.com/120.png?text=GB", link:"https://example.com/game-beta", website:"https://example.com/studio-y" }
+    ],
+    tweaks: [
+      { name:"Theme Maker", dev:"Glass Labs", version:"4.2", cat:"Theme", desc:"Custom icon themes with live previews.", icon:"https://via.placeholder.com/120.png?text=TM", link:"https://example.com/theme-maker", website:"https://example.com/glass-labs" },
+      { name:"Quick Cast", dev:"Wave Mods", version:"1.6", cat:"Media", desc:"Instant casting to nearby devices.", icon:"https://via.placeholder.com/120.png?text=QC", link:"https://example.com/quick-cast", website:"https://example.com/wave-mods" }
+    ]
+  };
+
+  // Elements
+  const featuredList = document.getElementById('featuredList');
+  const gamesList = document.getElementById('gamesList');
+  const tweaksList = document.getElementById('tweaksList');
+  const searchInput = document.getElementById('search');
+  const searchInput2 = document.getElementById('search2');
+
+  const heroImg = document.getElementById('heroImg');
+  const heroTitle = document.getElementById('heroTitle');
+  const heroSub = document.getElementById('heroSub');
+  const heroGet = document.getElementById('heroGet');
+  const heroInfo = document.getElementById('heroInfo');
+
+  // Modal elements
+  const backdrop = document.getElementById('modalBackdrop');
+  const modal = document.getElementById('modal');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalDev = document.getElementById('modalDev');
+  const modalVersion = document.getElementById('modalVersion');
+  const modalCategory = document.getElementById('modalCategory');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalWebsite = document.getElementById('modalWebsite');
+  const modalCopy = document.getElementById('modalCopy');
+  const modalGet = document.getElementById('modalGet');
+  const modalClose = document.getElementById('modalClose');
+
+  // Build a glass card
+  function makeCard(app){
+    const card = document.createElement('div');
+    card.className = 'glass row app-card';
+    const noise = document.createElement('div'); noise.className = 'noise'; card.appendChild(noise);
+
+    const img = document.createElement('img'); img.className = 'icon'; img.src = app.icon; img.alt = app.name;
+    const meta = document.createElement('div'); meta.className = 'meta';
+    const title = document.createElement('div'); title.className = 'title'; title.textContent = app.name;
+    const sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = `${app.dev} • ${app.cat}`;
+    meta.appendChild(title); meta.appendChild(sub);
+
+    const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'GET';
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); window.open(app.link, '_blank'); });
+
+    card.appendChild(img); card.appendChild(meta); card.appendChild(btn);
+    card.addEventListener('click', ()=> openModal(app));
+    return card;
+  }
+
+  // Render lists
+  function renderLists(){
+    featuredList.innerHTML = '';
+    gamesList.innerHTML = '';
+    tweaksList.innerHTML = '';
+    DATA.featured.forEach(a => featuredList.appendChild(makeCard(a)));
+    DATA.games.forEach(a => gamesList.appendChild(makeCard(a)));
+    DATA.tweaks.forEach(a => tweaksList.appendChild(makeCard(a)));
+  }
+
+  // Modal open/close
+  function openModal(app){
+    modalIcon.src = app.icon; modalIcon.alt = app.name;
+    modalTitle.textContent = app.name;
+    modalDev.textContent = `Developer: ${app.dev}`;
+    modalVersion.textContent = `Version: ${app.version}`;
+    modalCategory.textContent = app.cat || '—';
+    modalDesc.textContent = app.desc;
+    modalWebsite.href = app.website;
+    modalWebsite.textContent = app.website.replace(/^https?:\/\//,'');
+    modalCopy.onclick = async ()=> {
+      try { await navigator.clipboard.writeText(app.link); } 
+      catch {
+        const ta = document.createElement('textarea');
+        ta.value = app.link; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); ta.remove();
+      }
+    };
+    modalGet.onclick = ()=> window.open(app.link, '_blank');
+    backdrop.classList.add('show');
+    requestAnimationFrame(()=> modal.classList.add('show'));
+  }
+  function closeModal(){
+    modal.classList.remove('show');
+    backdrop.classList.remove('show');
+    // display:none handled by .show toggle (keeps fade)
+  }
+  modalClose.addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e)=>{ if(e.target === backdrop) closeModal(); });
+
+  // Init hero
+  function initHero(){
+    heroImg.style.backgroundImage = `url('${DATA.hero.banner}')`;
+    heroTitle.textContent = DATA.hero.name;
+    heroSub.textContent = `${DATA.hero.dev} • ${DATA.hero.cat}`;
+    heroGet.addEventListener('click', ()=> window.open(DATA.hero.link, '_blank'));
+    heroInfo.addEventListener('click', ()=> openModal(DATA.hero));
+  }
+
+  // Search across sections
+  function applySearch(q){
+    const query = q.trim().toLowerCase();
+    function filter(list){
+      return list.filter(a =>
+        a.name.toLowerCase().includes(query) ||
+        a.dev.toLowerCase().includes(query) ||
+        a.cat.toLowerCase().includes(query)
+      );
+    }
+    featuredList.innerHTML = ''; gamesList.innerHTML = ''; tweaksList.innerHTML = '';
+    filter(DATA.featured).forEach(a => featuredList.appendChild(makeCard(a)));
+    filter(DATA.games).forEach(a => gamesList.appendChild(makeCard(a)));
+    filter(DATA.tweaks).forEach(a => tweaksList.appendChild(makeCard(a)));
+  }
+  searchInput.addEventListener('input', ()=> applySearch(searchInput.value));
+  searchInput2.addEventListener('input', ()=> applySearch(searchInput2.value));
+
+  // Tab switching
+  const tabs = Array.from(document.querySelectorAll('.nav-pill'));
+  const pages = {
+    'page-today': document.getElementById('page-today'),
+    'page-games': document.getElementById('page-games'),
+    'page-tweaks': document.getElementById('page-tweaks'),
+    'page-search': document.getElementById('page-search')
+  };
+  function setTab(id){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+    Object.keys(pages).forEach(k => {
+      pages[k].classList.toggle('active', k === id);
+    });
+    if(id === 'page-search'){ (searchInput2.value ? null : searchInput2.focus()); }
+  }
+  tabs.forEach(t => t.addEventListener('click', ()=> setTab(t.dataset.tab)));
+
+  // Init
+  initHero();
+  renderLists();
+</script>
+</body>
+</html>
+```
