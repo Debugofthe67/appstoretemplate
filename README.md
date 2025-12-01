@@ -1,6 +1,6 @@
 # appstoretemplate
 Template to make online App Stores
-##Code 
+## Code ##
 This is the code
 ```
 <!DOCTYPE html>
